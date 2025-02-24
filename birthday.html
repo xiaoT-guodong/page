@@ -87,7 +87,7 @@
 <body>
 <!--&lt;!&ndash;更改为你女朋友的头像&ndash;&gt;-->
 <div class="cs">
-    <img src="./index_files/photo.jpg" id="logo">
+    <img src="./photo.jpg" id="logo">
 </div>
 <canvas class="canvas" width="1820" height="905"></canvas>
 <p class="text" style="color: #ed3073;">
@@ -111,17 +111,19 @@
         e_minsold = (e_hrsold - hrsold) * 60;
         minsold = Math.floor((e_hrsold - hrsold) * 60);
         seconds = Math.floor((e_minsold - minsold) * 60);
-        span_dt_dt.innerHTML = daysold + "天" + hrsold + "小时" + minsold + "分" + seconds + "秒";
+        span_dt_dt.innerHTML = "你已来到这个世界" + daysold + "天" + hrsold + "小时" + minsold + "分" + seconds + "秒";
     }
     show_date_time();
 </script>
 <script>
+	alert("注意！你需要随便点击一下用来播放音乐哦");
     var S = {
         init: function () {
             S.Drawing.init('.canvas');
             document.body.classList.add('body--ready');
             //想说的话
-            S.UI.simulate("潘雯茜|你这个美少女|18岁生日快乐哟|天天开心|#countdown 3|#rectangle 15x15|#circle 12 |#time");
+            //S.UI.simulate("潘雯茜|你这个美少女|18岁生日快乐哟|天天开心|#countdown 3|#rectangle 15x15|#circle 12 |#time");
+			S.UI.simulate("美少女|潘雯茜|18岁生日快乐哟|天天开心||#time");
             S.Drawing.loop(function () {
                 S.Shape.render();
             });
@@ -573,9 +575,20 @@
         };
     }());
     S.init();
+	
+	document.addEventListener('click', function() {
+    var audio = document.getElementById('mpfour'); // 使用正确的ID
+    if(audio) {
+        audio.play().catch(function(error) {
+            console.log("播放音频时发生错误: ", error);
+        });
+    }
+	
+	
+});
 </script>
 <!--//音乐可改-->
-<audio autoplay="autoplay" loop="loop">
+<audio autoplay="autoplay" loop="loop" id="mpfour">
     <source src="https://webfs.kugou.com/202502242058/19fc9ce27c45ed5841e67ef19db0aadd/v3/952ca091721e52c3f833f1937e01bf1b/yp/p_0_960123/ap1014_us601875618_mii0w1iw8z2ai2iphcu80ooo2ki81120_pi406_mx40024749_s3896991740.mp3" type="audio/mpeg">
 </audio>
 </body>
