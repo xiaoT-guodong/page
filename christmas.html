@@ -6,6 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <link rel="icon" href="data:," />
     <title>Merry Christmas</title>
     <style>
       body {
@@ -885,10 +886,12 @@ function drawStars() {
       }      
     }
     let init_flag = false;
-    // music（使用 https，避免 GitHub Pages 下的混合内容拦截）
-    let music_url =
-      "https://music.163.com/song/media/outer/url?id=1892513656.mp3";
+    // music：公共领域的《We Wish You a Merry Christmas》器乐曲，本地托管避免外链失效
+    // 音源：Wikimedia Commons（Anonimo - We Wish You a Merry Christmas.ogg 的 MP3 转码）
+    let music_url = "./we-wish-you-a-merry-christmas.mp3";
     let _music = new Audio(music_url);
+    _music.loop = true;
+    _music.volume = 0.7;
 
     function start() {
       if (init_flag) return;
