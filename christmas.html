@@ -2,6 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>Merry Christmas</title>
     <style>
       body {
@@ -18,12 +22,24 @@
         width: 100%;
         margin: 0;
         padding: 0;
+        overflow: hidden;
+        -webkit-text-size-adjust: 100%;
+        overscroll-behavior: none;
       }
 
       svg {
         width: 90%;
         height: 90%;
         visibility: hidden;
+      }
+
+      .main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
       }
 
       .sparkle {
@@ -44,13 +60,15 @@
       }
 
       #header {
-        /* position: absolute; */
-            text-align: center;
-            color: #C89568;
-            font-family: Times New Roman;
-            font-size: 35px;
-            min-width: 400px;
-            max-height: 100vh;
+        text-align: center;
+        color: #C89568;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 35px;
+        width: 100%;
+        min-width: 0;
+        max-height: 30vh;
+        overflow: hidden;
+        box-sizing: border-box;
       }
       .header-item {
         opacity: 0;
@@ -66,16 +84,25 @@
       }
       #mask {
         position: absolute;
+        inset: 0;
         background-color: #000;
         width: 100%;
         height: 100%;
-        font-size: 15rem;
-        animation: shack 0.4s ease-in-out infinite;
+        font-size: clamp(80px, 22vw, 15rem);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        /* display: none; */
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      /* 只让树形图标晃动，避免整屏旋转导致移动端页面被放大 */
+      .mask-emoji {
+        display: inline-block;
+        animation: shack 0.5s ease-in-out 3;
       }
 
       @keyframes shack {
@@ -101,10 +128,33 @@
         height: 100%;
         z-index: -1;
       }
+
+      @media (max-width: 768px) {
+        body {
+          line-height: 1.5;
+        }
+
+        svg {
+          width: 100%;
+          height: auto;
+          max-height: 68vh;
+        }
+
+        #header {
+          font-size: clamp(16px, 4.5vw, 24px);
+          padding: 0 12px 12px;
+        }
+
+        #mask {
+          font-size: clamp(64px, 20vw, 120px);
+        }
+      }
     </style>
   </head>
   <body>
-    <div id="mask">🎄</div>
+    <div id="mask" role="button" tabindex="0" aria-label="点击开始">
+      <span class="mask-emoji">🎄</span>
+    </div>
     <canvas id="stars"></canvas>
     <div class="main">
     <!-- partial:index.partial.html -->
@@ -342,17 +392,17 @@
       var flake = document.createElement("div");
       // 雪花字符 ❄❉❅❆✻✼❇❈❊✥✺
       flake.innerHTML = "❆";
-      flake.style.cssText = "position:absolute;color:#fff;";
-
-      //获取页面的高度 相当于雪花下落结束时Y轴的位置
-      var documentHieght = window.innerHeight;
-      //获取页面的宽度，利用这个数来算出，雪花开始时left的值
-      var documentWidth = window.innerWidth;
+      // fixed 定位避免雪花超出视口后撑大移动端页面
+      flake.style.cssText =
+        "position:fixed;color:#fff;pointer-events:none;";
 
       //定义生成一片雪花的毫秒数
       var millisec = 100;
       //2、设置第一个定时器，周期性定时器，每隔一段时间（millisec）生成一片雪花；
       setInterval(function () {
+        // 每次读取当前视口尺寸，兼容横竖屏切换
+        var documentWidth = window.innerWidth,
+          documentHieght = window.innerHeight;
         //页面加载之后，定时器就开始工作
         //随机生成雪花下落 开始 时left的值，相当于开始时X轴的位置
         var startLeft = Math.random() * documentWidth;
@@ -670,7 +720,7 @@ function drawStars() {
         hue = 37, //色调色彩
         stars = [], //保存所有星星
         count = 0, //用于计算星星
-        maxStars = 1300; //星星数量
+        maxStars = window.innerWidth < 768 ? 500 : 1300; //移动端减少星星数量，避免卡顿
 
       //canvas2是用来创建星星的源图像，即母版，
       //根据星星自身属性的大小来设置
@@ -794,6 +844,18 @@ function drawStars() {
       }
 
       animation();
+
+      // 横竖屏切换时重设画布，星星继续围绕新的屏幕中心旋转
+      window.addEventListener("resize", function () {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        for (var i = 1; i < stars.length; i++) {
+          if (stars[i]) {
+            stars[i].orbitX = w / 2;
+            stars[i].orbitY = h / 2;
+          }
+        }
+      });
     }
 
 
@@ -821,23 +883,38 @@ function drawStars() {
       }      
     }
     let init_flag = false;
-      // music
-      let music_url = "http://music.163.com/song/media/outer/url?id=1892513656.mp3";
-      let _music = new Audio(music_url);
-      window.onclick = function() {
-        if(init_flag) return;
-        init_flag = true;
-        _music.play();
-        init();
-        let mask = document.getElementById("mask");
-        mask.remove();
-        createParticles()
-        drawStar();
-        drawMain();
-        mainTl.add(starTl, 0);
-        gsap.globalTimeline.timeScale(1.5); //  圣诞树开始绘画时小光点动画的绘画速率，越大越快
-        drawStars();
+    // music（使用 https，避免 GitHub Pages 下的混合内容拦截）
+    let music_url =
+      "https://music.163.com/song/media/outer/url?id=1892513656.mp3";
+    let _music = new Audio(music_url);
+
+    function start() {
+      if (init_flag) return;
+      init_flag = true;
+
+      // 先移除遮罩，避免移动端点击后仍继续晃动
+      let mask = document.getElementById("mask");
+      if (mask) mask.remove();
+
+      // 移动端浏览器可能拒绝播放，失败时不影响动画
+      let playing = _music.play();
+      if (playing && typeof playing.catch === "function") {
+        playing.catch(function () {});
       }
+
+      init();
+      createParticles();
+      drawStar();
+      drawMain();
+      mainTl.add(starTl, 0);
+      gsap.globalTimeline.timeScale(1.5); //  圣诞树开始绘画时小光点动画的绘画速率，越大越快
+      drawStars();
+    }
+
+    // 同时兼容鼠标、触摸和键盘；pointerdown 可避开移动端点击延迟
+    window.addEventListener("pointerdown", start, { once: true });
+    window.addEventListener("click", start, { once: true });
+    window.addEventListener("keydown", start, { once: true });
   
   </script>
 </html>
